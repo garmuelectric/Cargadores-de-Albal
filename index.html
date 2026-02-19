@@ -9,7 +9,6 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <style>
@@ -38,59 +37,12 @@ body {
   text-align:center;
 }
 
-/* LOGIN */
-.auth-box {
-  position:absolute;
-  top:15px;
-  right:15px;
-  z-index:1000;
-  background:white;
-  padding:8px;
-  border-radius:10px;
-  box-shadow:0 2px 6px rgba(0,0,0,0.2);
-}
-
-.auth-box input {
-  padding:6px;
-  margin:2px;
-  border-radius:6px;
-  border:1px solid #ccc;
-  font-size:12px;
-}
-
-.auth-box button {
-  padding:6px 10px;
-  border:none;
-  border-radius:6px;
-  cursor:pointer;
-  background:#111;
-  color:white;
-}
-
 /* RESPONSIVE MÓVIL */
 @media (max-width: 600px) {
-
   .header {
     top:10px;
     font-size:16px;
     padding:8px 16px;
-  }
-
-  .auth-box {
-    top:60px;
-    right:50%;
-    transform:translateX(50%);
-    width:85%;
-    text-align:center;
-  }
-
-  .auth-box input {
-    width:90%;
-    margin-bottom:5px;
-  }
-
-  .auth-box button {
-    width:95%;
   }
 }
 
@@ -110,30 +62,11 @@ body {
   50% { transform: scale(1.15); }
   100% { transform: scale(1); }
 }
-
-.contador-mini {
-  position:absolute;
-  bottom:-8px;
-  left:50%;
-  transform:translateX(-50%);
-  background:black;
-  color:white;
-  font-size:10px;
-  padding:2px 6px;
-  border-radius:6px;
-}
 </style>
 </head>
 <body>
 
 <div class="header">⚡ GarmuElectric</div>
-
-<div class="auth-box" id="authBox">
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Contraseña">
-  <button onclick="login()">Entrar</button>
-</div>
-
 <div id="map"></div>
 
 <script>
@@ -151,36 +84,6 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-const auth = firebase.auth();
-
-let usuarioActual = null;
-let timers = {};
-
-auth.onAuthStateChanged(user=>{
-  usuarioActual = user;
-  const box = document.getElementById("authBox");
-
-  if(user){
-    box.innerHTML = `
-      <span style="background:#28a745;color:white;padding:6px 10px;border-radius:6px;">
-        Conectado
-      </span>
-      <button onclick="logout()">Salir</button>
-    `;
-  }
-});
-
-function login(){
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  auth.signInWithEmailAndPassword(email, password)
-    .catch(error => alert(error.message));
-}
-
-function logout(){
-  auth.signOut();
-  location.reload();
-}
 
 // ================= MAPA =================
 const map = L.map('map').setView([39.396, -0.409], 15);
@@ -233,6 +136,8 @@ function crearIconoRayo(color){
 }
 
 // ================= CONTADOR =================
+let timers = {};
+
 function iniciarContador(id, timestamp){
   if(timers[id]) clearInterval(timers[id]);
 
@@ -329,3 +234,4 @@ cargadores.forEach(c=>{
 </script>
 </body>
 </html>
+
