@@ -175,7 +175,7 @@ function crearPopup(id, estado, timestamp){
   const div = document.createElement("div");
 
   div.innerHTML = `
-    <div style="font-size:24px;">⚡</div>
+    <div style="font-size:50px;">⚡</div>
     <strong>${id}</strong><br>
     ${estado === "red" ? "🔴 EN USO" : "🟢 LIBRE"}<br>
     <span id="timer-${id}"></span><br>
@@ -235,6 +235,7 @@ cargadores.forEach(c=>{
 </script>
 </body>
 </html>
+
 
 
 
