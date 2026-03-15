@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html>
 <head>
@@ -37,10 +38,30 @@ z-index:1000;
 text-align:center;
 }
 
+.bloqueo{
+position:absolute;
+top:70px;
+left:50%;
+transform:translateX(-50%);
+background:#c40000;
+color:white;
+padding:10px 20px;
+border-radius:10px;
+font-size:16px;
+font-weight:bold;
+z-index:1000;
+box-shadow:0 4px 10px rgba(0,0,0,0.4);
+}
+
 @media(max-width:600px){
 .header{
 font-size:16px;
 padding:8px 16px;
+}
+
+.bloqueo{
+font-size:14px;
+padding:8px 14px;
 }
 }
 
@@ -71,6 +92,10 @@ cursor:pointer;
 ⚡ GarmuElectric Reparaciones e Instalaciones Electricas 606774561
 </div>
 
+<div id="cartelBloqueo" class="bloqueo">
+🚧 Puntos San Carlos bloqueados por Fallas hasta 20/03/2026 07:00
+</div>
+
 <div id="map"></div>
 
 <script>
@@ -99,6 +124,29 @@ maxZoom:19
 // CONFIG
 const TIEMPO_USO=4*60*60*1000;
 const MARGEN_LIBERACION=15*60*1000;
+
+// BLOQUEO FALLAS
+const FIN_BLOQUEO_FALLAS = new Date("2026-03-20T07:00:00").getTime();
+
+function sanCarlosBloqueado(id){
+return (
+(id==="San Carlos-A" || id==="San Carlos-B") &&
+Date.now() < FIN_BLOQUEO_FALLAS
+);
+}
+
+// OCULTAR CARTEL AUTOMÁTICAMENTE
+function comprobarCartel(){
+
+if(Date.now() > FIN_BLOQUEO_FALLAS){
+const cartel=document.getElementById("cartelBloqueo");
+if(cartel) cartel.style.display="none";
+}
+
+}
+
+setInterval(comprobarCartel,60000);
+comprobarCartel();
 
 // FORMATO HORA
 function hora(ts){
@@ -184,33 +232,33 @@ String(s).padStart(2,"0");
 // CAMBIAR ESTADO
 window.cambiar=function(id,estado){
 
-db.ref("cargadores/"+id).once("value").then(snap=>{
-
-const data=snap.val();
-
-if(data?.bloqueado){
-alert(data.mensaje || "Punto bloqueado");
+if(sanCarlosBloqueado(id)){
+alert("Punto bloqueado por Fallas hasta el 20/03/2026 a las 07:00");
 return;
 }
 
-let update={estado:estado};
+let data={estado:estado};
 
-if(estado==="red") update.inicio=Date.now();
-if(estado==="green") update.fin=Date.now();
+if(estado==="red"){
+data.inicio=Date.now();
+}
 
-db.ref("cargadores/"+id).update(update);
+if(estado==="green"){
+data.fin=Date.now();
+}
 
-});
+db.ref("cargadores/"+id).update(data);
 
 }
 
 // POPUP
 function popup(id,data){
 
-if(data?.bloqueado){
+if(sanCarlosBloqueado(id)){
 return `
 <strong>${id}</strong><br>
-🚧 <b>${data.mensaje || "Punto temporalmente bloqueado"}</b>
+🚧 <b>Bloqueado por Fallas</b><br>
+Disponible el <b>20/03/2026 a las 07:00</b>
 `;
 }
 
@@ -272,15 +320,18 @@ const ref=db.ref("cargadores/"+c.id);
 
 ref.on("value",snap=>{
 
-const data=snap.val()||{};
-
-if(data.bloqueado){
-marker.setIcon(crearIcono("black"));
+if(sanCarlosBloqueado(c.id)){
+marker.setIcon(crearIcono("red"));
 marker.unbindPopup();
-marker.bindPopup(popup(c.id,data));
+marker.bindPopup(`
+<strong>${c.id}</strong><br>
+🚧 <b>Bloqueado por Fallas</b><br>
+Disponible el <b>20/03/2026 a las 07:00</b>
+`);
 return;
 }
 
+const data=snap.val()||{};
 const estado=data.estado||"green";
 
 let color="green";
@@ -320,3 +371,4 @@ marker.bindPopup(popup(c.id,data));
 
 </body>
 </html>
+```
